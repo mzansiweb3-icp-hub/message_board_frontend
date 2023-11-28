@@ -1,4 +1,4 @@
-# message_board
+# Message board frontend
 
 ### This is the updated version of the DACADE course starter example, using the latest version of Azle cdk with updated syntax for typescript canister development.
 
