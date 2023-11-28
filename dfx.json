@@ -1,0 +1,25 @@
+{
+  "canisters": {
+    "message_board": {
+      "type": "custom",
+      "main": "backend/index.ts",
+      "candid": "backend/index.did",
+      "build": "npx azle message_board",
+      "wasm": ".azle/message_board/message_board.wasm",
+      "gzip": true
+    },
+    "frontend": {
+      "dependencies": ["message_board"],
+      "type": "assets",
+      "source": ["dist/"]
+    }
+  },
+  "defaults": {
+    "build": {
+      "args": "",
+      "packtool": ""
+    }
+  },
+  "output_env_file": ".env",
+  "version": 1
+}
