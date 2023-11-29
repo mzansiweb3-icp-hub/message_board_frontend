@@ -18,7 +18,7 @@ const App = () => {
     await authClient.login({
       identityProvider:
         env === "local"
-          ? `http://localhost:4943?canisterId=${"be2us-64aaa-aaaaa-qaabq-cai"}`
+          ? `http://localhost:4943?canisterId=${"avqkn-guaaa-aaaaa-qaaea-cai"}`
           : "https://identity.ic0.app/#authorize",
       onSuccess: () => {
         checkAuth();

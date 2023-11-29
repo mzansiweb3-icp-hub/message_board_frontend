@@ -3,8 +3,6 @@ import { Actor, HttpAgent } from "@dfinity/agent";
 import { canisterId, idlFactory } from "../declarations/message_board";
 import { AuthClient } from "@dfinity/auth-client";
 
-const authClient = await AuthClient.create();
-const identity = authClient.getIdentity();
 
 const localhost = "http://localhost:4943";
 const livehost = "https://icp0.io";
@@ -17,6 +15,16 @@ const Messaging = ({ isAuthenticated }) => {
   const [attachmentUrl, setAttachmentUrl] = useState("");
   const [messages, setMessages] = useState([] as any);
   const [sending, setSending] = useState(false);
+  const [identity, setIdentity] = useState<any>();
+
+  useEffect(()=>{
+    const initializeAuthClient = async () => {
+      const client = await AuthClient.create();
+      const id = client.getIdentity();
+      setIdentity(id);
+    };
+    initializeAuthClient();
+  }, [])
 
   let agent = new HttpAgent({
     host: env === "local" ? localhost : livehost,
@@ -31,13 +39,15 @@ const Messaging = ({ isAuthenticated }) => {
     canisterId: canisterId,
   });
 
+  // what is the diff btn an agent and a backend actor?
+
   const sendMessage = async (e) => {
     e.preventDefault();
     try {
       setSending(true);
       const message = {
-        title,
-        body,
+        title: title,
+        body: body,
         attachmentURL: attachmentUrl,
       };
       await backendActor.addMessage(message);
