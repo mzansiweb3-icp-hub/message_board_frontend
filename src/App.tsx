@@ -1,9 +1,15 @@
 import { AuthClient } from "@dfinity/auth-client";
-import React, { useEffect, useState } from "react";
+import  { useEffect, useState } from "react";
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom'
+import { Actor, HttpAgent } from "@dfinity/agent";
+import { canisterId, idlFactory } from "./declarations/message_board";
 import Navbar from "./Components/Navbar";
-import Messaging from "./Components/Messaging";
+import Home from "./Components/Home";
+import MessegeInput from "./Components/MessegeInput"
 
 const env = process.env.DFX_NETWORK || "local";
+const localhost = "http://localhost:4943";
+const livehost = "https://icp0.io";
 
 const App = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -18,7 +24,7 @@ const App = () => {
     await authClient.login({
       identityProvider:
         env === "local"
-          ? `http://localhost:4943?canisterId=${"be2us-64aaa-aaaaa-qaabq-cai"}`
+          ? `http://localhost:4943?canisterId=${"bd3sg-teaaa-aaaaa-qaaba-cai"}`
           : "https://identity.ic0.app/#authorize",
       onSuccess: () => {
         checkAuth();
@@ -47,11 +53,42 @@ const App = () => {
     checkAuth();
   }, []);
 
+  const [identity, setIdentity] = useState<any>();
+
+  useEffect(()=>{
+    const initializeAuthClient = async () => {
+      const client = await AuthClient.create();
+      const id = client.getIdentity();
+      setIdentity(id);
+    };
+    initializeAuthClient();
+  }, [])
+
+  let agent = new HttpAgent({
+    host: env === "local" ? localhost : livehost,
+    identity: identity,
+  });
+
+  //Only use agent.fetchRootKey() in development mode, in production remove this line
+  agent.fetchRootKey();
+
+  const backendActor = Actor.createActor(idlFactory, {
+    agent,
+    canisterId: canisterId,
+  });
+
   return (
-    <div className="bg-white min-h-screen h-full">
-      <Navbar {...{ login, logout, isAuthenticated }} />
-      <Messaging {...{isAuthenticated}} />
-    </div>
+    <Router>
+      <div className="bg-gray-900 text-white min-h-screen">
+        <Navbar {...{ login, logout, isAuthenticated }} />
+        <div>
+          <Routes>
+            <Route path="/" element={<Home {...{ isAuthenticated, backendActor }} />} />
+            <Route path="add-message" element={<MessegeInput backendActor={backendActor} />} />
+          </Routes>
+        </div>
+      </div>
+    </Router>
   );
 };
 
